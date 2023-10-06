@@ -75,6 +75,9 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
   private final ReactApplicationContext reactContext;
   private final int dialogThemeId;
 
+  // Android 13 no longer needs WRITE_EXTERNAL_STORAGE, but does need READ_MEDIA_IMAGES
+  private final String READ_MEDIA_PERMISSION = android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU ? Manifest.permission.WRITE_EXTERNAL_STORAGE : Manifest.permission.READ_MEDIA_IMAGES;
+
   protected Callback callback;
   private Callback permissionRequestCallback;
 
@@ -572,7 +575,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
                                    @NonNull final int requestCode)
   {
     final int writePermission = ActivityCompat
-            .checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            .checkSelfPermission(activity, this.READ_MEDIA_PERMISSION);
     final int cameraPermission = ActivityCompat
             .checkSelfPermission(activity, Manifest.permission.CAMERA);
 
@@ -589,7 +592,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
 
     if (!permissionsGranted)
     {
-      final Boolean dontAskAgain = ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA);
+      final Boolean dontAskAgain = ActivityCompat.shouldShowRequestPermissionRationale(activity, this.READ_MEDIA_PERMISSION) && ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA);
 
       if (dontAskAgain)
       {
@@ -638,10 +641,10 @@ public class ImagePickerModule extends ReactContextBaseJavaModule
         String[] PERMISSIONS;
         switch (requestCode) {
           case REQUEST_PERMISSIONS_FOR_LIBRARY:
-            PERMISSIONS = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            PERMISSIONS = new String[]{this.READ_MEDIA_PERMISSION};
             break;
           case REQUEST_PERMISSIONS_FOR_CAMERA:
-            PERMISSIONS = new String[]{Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            PERMISSIONS = new String[]{Manifest.permission.CAMERA,this.READ_MEDIA_PERMISSION};
             break;
           default:
             PERMISSIONS = new String[]{};
